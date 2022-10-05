@@ -1,0 +1,8 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="JavaInternet:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/JavaInternet_jar</output-path>
+    <root id="archive" name="JavaInternet.jar">
+      <element id="module-output" name="JavaInternet" />
+    </root>
+  </artifact>
+</component>

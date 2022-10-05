@@ -78,7 +78,7 @@ WUH 武汉
 WUS 武夷山
 WUX 无锡
 WUZ 悟州
-XFN 襄樊
+XFN 襄阳
 XIY 西安
 XNN 西宁
 XNT 刑台
