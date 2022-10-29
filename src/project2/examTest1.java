@@ -75,6 +75,7 @@ class readData extends Thread {
 /**
  * 数据分析线程
  */
+
 class analysisData extends Thread {
     private List<String> inputData;
     private Hashtable<String, String[]> outputData;
