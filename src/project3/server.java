@@ -22,6 +22,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.awt.event.ActionEvent;
 
+
+/**
+ * @author BoWen
+ * @Data
+ */
 public class server extends JFrame {
 
 
@@ -29,22 +34,22 @@ public class server extends JFrame {
      * 定义各种数据
      */
 
-    static String flid = null;  // 即数据文件中每行数据的flid
-    static String flightNumber = null; // 航班号，如CA1402
-    static String sfawOne = null; // 共享航班公司1
-    static String sfnoOne = null; // 共享航班号1
-    static String sfawTwo = null; // 共享航班公司2
-    static String sfnoTwo = null; // 共享航班号2
-    static String sfawThree = null; // 共享航班公司3
-    static String sfnoThree = null; // 共享航班号3
-    static String aimStation = null; // 目的站
-    static String transferStation = null; // 中转站
-    static String destinationStation = null; //终点站
-    static String planToFlyTime = null; // 预计起飞时间
-    static String changeToFlyTime = null; // 变更起飞时间
-    static String actualFlyTime = null;//实际起飞时间
-    static String gate = null; // 登机口
-    static String state = null; // 登机状态
+    private static String flid = null;  // 即数据文件中每行数据的flid
+    private static String flightNumber = null; // 航班号，如CA1402
+    private static String sfawOne = null; // 共享航班公司1
+    private static String sfnoOne = null; // 共享航班号1
+    private static String sfawTwo = null; // 共享航班公司2
+    private static String sfnoTwo = null; // 共享航班号2
+    private static String sfawThree = null; // 共享航班公司3
+    private static String sfnoThree = null; // 共享航班号3
+    private static String aimStation = null; // 目的站
+    private static String transferStation = null; // 中转站
+    private static String destinationStation = null; //终点站
+    private static String planToFlyTime = null; // 预计起飞时间
+    private static String changeToFlyTime = null; // 变更起飞时间
+    private static String actualFlyTime = null;//实际起飞时间
+    private static String gate = null; // 登机口
+    private static String state = null; // 登机状态
 
     private JPanel contentPane;
     private JTable table;
