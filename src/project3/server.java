@@ -428,7 +428,7 @@ public class server extends JFrame {
 				Socket clientSockerSocket = new Socket("localHost",9999);
                 Scanner sc = new Scanner(clientSockerSocket.getInputStream());
                 String line = sc.nextLine();
-                JOptionPane.showMessageDialog(null, "连接服务器成功!"+"\n"+line);
+                JOptionPane.showMessageDialog(null, "连接服务器成功!");
 
                 while(sc.hasNextLine() && !isCancelled()) {
                     line=sc.nextLine();
