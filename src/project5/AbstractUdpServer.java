@@ -8,28 +8,29 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
+ * UDPServer的抽象类
  * @author BoWen
  * @version 1.0
  * @date 2022/10/31
  */
 
-public abstract class UDPServer implements Runnable {
+public abstract class AbstractUdpServer implements Runnable {
     //字节
     private int bufferSize;
     //端口
     private final int port;
     //日志
-    private final Logger logger=Logger.getLogger(UDPServer.class.getCanonicalName());
+    private final Logger logger=Logger.getLogger(AbstractUdpServer.class.getCanonicalName());
     //是否关闭
     private volatile boolean isShutDown=false;
 
-    public UDPServer(int bufferSize,int port) {
+    public AbstractUdpServer(int bufferSize, int port) {
         this.bufferSize=bufferSize;
         this.port=port;
 
     }
 
-    public UDPServer(int port){
+    public AbstractUdpServer(int port){
         this(8192,port);
     }
 
@@ -40,7 +41,9 @@ public abstract class UDPServer implements Runnable {
             logger.log(Level.INFO,"服务器启动成功！");
             while (true) {
                 //先检查变量
-                if (isShutDown) return;
+                if (isShutDown) {
+                    return;
+                }
                 //
                 DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
                 socket.receive(incoming);
@@ -58,6 +61,7 @@ public abstract class UDPServer implements Runnable {
     protected abstract void respond(DatagramSocket socket, DatagramPacket incoming);
 
     protected void shuDown(){
+
         isShutDown=true;
     }
 
