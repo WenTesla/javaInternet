@@ -1,6 +1,8 @@
 package project5;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -14,8 +16,8 @@ import java.util.logging.Logger;
  * @date 2022/10/31
  */
 
-public abstract class AbstractUdpServer implements Runnable {
-    //字节
+public abstract class AbstractUdpServer implements Runnable  {
+    //字节长度
     private int bufferSize;
     //端口
     private final int port;
@@ -27,7 +29,6 @@ public abstract class AbstractUdpServer implements Runnable {
     public AbstractUdpServer(int bufferSize, int port) {
         this.bufferSize=bufferSize;
         this.port=port;
-
     }
 
     public AbstractUdpServer(int port){
@@ -61,7 +62,6 @@ public abstract class AbstractUdpServer implements Runnable {
     protected abstract void respond(DatagramSocket socket, DatagramPacket incoming);
 
     protected void shuDown(){
-
         isShutDown=true;
     }
 
