@@ -1,12 +1,16 @@
 package project5;
 
-import java.io.IOException;
+import com.sun.org.apache.bcel.internal.classfile.Field;
+
+import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.Scanner;
 
 /**
  * 继承UDPServer的类
  * 实现非阻塞发送UDP报文
+ *
  * @author BoWen
  * @version 2.0
  * @date 2022/10/31
@@ -28,7 +32,7 @@ public class UdpServer extends AbstractUdpServer {
     @Override
     protected void respond(DatagramSocket socket, DatagramPacket incoming) {
         //为每一个开启线程
-        new Thread(new FDSDataHandler(socket,incoming)).start();
+        new Thread(new FDSDataHandler(socket, incoming)).start();
 
     }
 
@@ -46,6 +50,21 @@ public class UdpServer extends AbstractUdpServer {
 class FDSDataHandler implements Runnable {
     private DatagramSocket socket;
     private DatagramPacket incoming;
+
+    private String lineInfo;
+    private byte[] lineData;
+    FileReader fileReader;
+
+    {
+        try {
+            fileReader = new FileReader("fdsdata.txt");
+        } catch (FileNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    BufferedReader bufferedReader = new BufferedReader(fileReader);
+
 
     public FDSDataHandler(DatagramSocket socket, DatagramPacket incoming) {
         super();
@@ -67,23 +86,39 @@ class FDSDataHandler implements Runnable {
             throw new RuntimeException(e);
         }
         //给客户端发送航班数据
-        String lineInfo = "ddtm=20180923000231 DFME_STLS[flid=1416561, ffid=CA-1529-20180923-D, fatt=2403, stnd=STND[stno=1, code=205, estr=20180923000700, eend=20180923071500, rstr=20180923000700, rend=null, btsc=null]]\n";
-
-        byte[] lineData = lineInfo.getBytes();
-        incoming.setData(lineData);
-        incoming.setLength(lineData.length);
         int count = 0;
         while (count < 10000) {
             try {
-                socket.send(incoming);
-                System.out.println("发生客户端:"+incoming.getSocketAddress()+"第"+count+"行数据");
-                count++;
-                Thread.sleep(1000);
+                while ((lineInfo = bufferedReader.readLine()) != null) {
+
+                    lineData = lineInfo.getBytes();
+                    incoming.setData(lineData);
+                    incoming.setLength(lineData.length);
+                    socket.send(incoming);
+
+                    System.out.println("发送客户端:" + incoming.getSocketAddress() + "第" + count + "行数据");
+                    System.out.println("数据如下" + lineInfo);
+                    count++;
+                    Thread.sleep(100);
+                }
+
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (InterruptedException e) {
                 throw new RuntimeException(e);
             }
         }
+        //传输完毕，发送no data！
+        String endData = "no data!";
+        byte[] endDataBytes = endData.getBytes();
+        incoming.setData(endDataBytes);
+        incoming.setLength(endDataBytes.length);
+        try {
+            socket.send(incoming);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+
+
     }
 }

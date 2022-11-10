@@ -1,8 +1,6 @@
 package project5;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -45,7 +43,7 @@ public abstract class AbstractUdpServer implements Runnable  {
                 if (isShutDown) {
                     return;
                 }
-                //
+                //初始化DatagramPacket
                 DatagramPacket incoming = new DatagramPacket(buffer, buffer.length);
                 socket.receive(incoming);
                 this.respond(socket,incoming);
@@ -61,7 +59,7 @@ public abstract class AbstractUdpServer implements Runnable  {
     //抽象类一定定义抽象方法
     protected abstract void respond(DatagramSocket socket, DatagramPacket incoming);
 
-    protected void shuDown(){
+    protected void shutDown(){
         isShutDown=true;
     }
 
