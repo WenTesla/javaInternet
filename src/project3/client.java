@@ -1,29 +1,34 @@
-package project5;
+package project3;
 
-import javax.swing.*;
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.JButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
-import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Properties;
+import java.net.Socket;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.awt.event.ActionEvent;
 
 
 /**
+ * client
  * @author BoWen
- * @Data 2022/11/10
+ * @Data
  */
-public class Client extends JFrame {
+public class client extends JFrame {
 
 
     /**
@@ -50,7 +55,7 @@ public class Client extends JFrame {
     private JPanel contentPane;
     private JTable table;
     private DefaultTableModel tm;
-    private int count = 0;
+    private int count=0;
     private ReceiveAndProcessData receiveAndProcessData;
 
     /**
@@ -60,7 +65,7 @@ public class Client extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    Client frame = new Client();
+                    client frame = new client();
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -73,7 +78,7 @@ public class Client extends JFrame {
      * Create the frame.
      */
 
-    public Client() {
+    public client() {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 591, 640);
         contentPane = new JPanel();
@@ -88,15 +93,33 @@ public class Client extends JFrame {
         btnNewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
+//				try {
+//					Socket socket = new Socket("43.140.200.253",9999);
+//					Scanner sc = new Scanner(socket.getInputStream());
+//					String line = sc.nextLine();
+//					JOptionPane.showMessageDialog(null, "连接服务器成功!"+"\n"+line);
+//
+//					while(sc.hasNextLine()) {
+//						line=sc.nextLine();
+//						tm.addRow(new String[]{(count++)+" ",line,"xxxx"});
+//					}
+//
+//				} catch (IOException e1) {
+//					// TODO Auto-generated catch block
+//					e1.printStackTrace();
+//				}
+
                 if (receiveAndProcessData == null) {
-                    receiveAndProcessData = new ReceiveAndProcessData();
+                    receiveAndProcessData= new ReceiveAndProcessData();
                     receiveAndProcessData.execute();
                     btnNewButton.setEnabled(false);
 
-                } else if (receiveAndProcessData.isCancelled()) {
+                }
+
+                else if (receiveAndProcessData.isCancelled()) {
                     btnNewButton.setEnabled(true);
                     receiveAndProcessData.cancel(false);
-                    receiveAndProcessData = null;
+                    receiveAndProcessData=null;
 
                 }
 
@@ -115,12 +138,13 @@ public class Client extends JFrame {
         btnNewButton_1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-                if (receiveAndProcessData != null && !receiveAndProcessData.isCancelled()) {
+                if(receiveAndProcessData!=null && !receiveAndProcessData.isCancelled()) {
                     receiveAndProcessData.cancel(true);
                     btnNewButton_1.setText("continue");
 
                     System.out.println("停止");
-                } else {
+                }
+                else {
                     receiveAndProcessData.cancel(false);
                     btnNewButton_1.setText("Pause");
 
@@ -134,12 +158,12 @@ public class Client extends JFrame {
         contentPane.add(scrollPane, BorderLayout.CENTER);
 
         table = new JTable();
-        tm = new DefaultTableModel(
-                new Object[][]{
-                        {null, null, null, null, null, null, null, null, null},
+        tm=new DefaultTableModel(
+                new Object[][] {
+                        {null, null, null, null, null, null,null,null,null},
                 },
-                new String[]{
-                        "航班号", "共享航班号", "中转站", "终点站", "预计起飞", "实际起飞", "登记口", "备注"
+                new String[] {
+                         "航班号", "共享航班号", "中转站", "终点站", "预计起飞", "实际起飞","登记口","备注"
                 }
         );
 
@@ -150,11 +174,11 @@ public class Client extends JFrame {
         scrollPane.setViewportView(table);
 
 
+
     }
+    class ReceiveAndProcessData extends SwingWorker<String, String[]>{
 
-    class ReceiveAndProcessData extends SwingWorker<String, String[]> {
-
-        String[] outputData = new String[10];
+        String[] outputData= new String[10];
 
         InputStream inputStream;
 
@@ -163,7 +187,7 @@ public class Client extends JFrame {
         {
             try {
                 inputStream = new FileInputStream("airport.txt");
-                airports.load(new InputStreamReader(inputStream, "UTF-8"));
+                airports.load(new InputStreamReader(inputStream,"UTF-8"));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
@@ -174,9 +198,13 @@ public class Client extends JFrame {
         }
 
 
+
+
+
+
         @Override
         protected void process(List<String[]> chunks) {
-            for (String[] data : chunks) {
+            for (String[] data:chunks){
 
                 if (data != null) {
                     System.out.println(Arrays.toString(data));
@@ -186,12 +214,10 @@ public class Client extends JFrame {
 
 
         }
-
         /**
          * 开始分析每一行
-         *
          * @param line
-         * @return String[]
+         * @return
          */
         private String[] analysisData(String line) {
 
@@ -272,6 +298,7 @@ public class Client extends JFrame {
 //                        "共享航班号2: " + sfawTwo + sfnoTwo + "\t"+  "共享航班号3: " + sfawThree + sfnoThree + "\t"  );
                 }
             }
+
 
 
             /**
@@ -388,44 +415,27 @@ public class Client extends JFrame {
                 state = "航班取消";
 
 
-            return new String[]{flightNumber, sfnoOne, transferStation, destinationStation, planToFlyTime, actualFlyTime, gate, state};
+
+
+            return new String[]{flightNumber,sfnoOne,transferStation,destinationStation,planToFlyTime,actualFlyTime,gate,state};
         }
 
         @Override
         protected String doInBackground() throws Exception {
-            String totalLine = null;
-            String line;
+
             // TODO Auto-generated method stub
-            try (
-                    DatagramSocket socket = new DatagramSocket(0);
-            ) {
-                InetSocketAddress server = new InetSocketAddress("localHost",9999);
-                //发完请求包
-                DatagramPacket requestData = new DatagramPacket(new byte[1], 1,server);
-                socket.send(requestData);
-                //设置超时时间(10s)
-                socket.setSoTimeout(10000);
-                byte[] buffer = new byte[8 * 1024];
-                DatagramPacket responseData = new DatagramPacket(buffer, buffer.length);
-                socket.receive(responseData);
-                //转换为字符串
-                totalLine = new String(responseData.getData(), responseData.getOffset(), responseData.getLength());
+            try {
+//                Socket clientSockerSocket = new Socket("43.140.200.253",9999);
+				Socket clientSockerSocket = new Socket("localHost",9999);
+                Scanner sc = new Scanner(clientSockerSocket.getInputStream());
+                String line = sc.nextLine();
+                JOptionPane.showMessageDialog(null, "连接服务器成功!");
 
-                System.out.println(totalLine);
-                tm.setRowCount(0);
-                //弹窗显示信息
-                JOptionPane.showMessageDialog(null, "连接服务器成功\r\n" + totalLine);
-                while (!receiveAndProcessData.isCancelled()) {
-                    socket.receive(responseData);
-                    line=new String(responseData.getData(),responseData.getOffset(),responseData.getLength());
-                    System.out.println(line);
-                    if ("no data!".equals(line))
-                        break;
-
+                while(sc.hasNextLine() && !isCancelled()) {
+                    line=sc.nextLine();
                     /**
                      * 如果有需要的信息
                      */
-
                     if (line.contains("DFME_AIRL") || line.contains("DFME_BORE") || line.contains("DFME_CANE")
                             || line.contains("DFME_DLYE") || line.contains("DFME_FPTT") || line.contains("DFME_FETT")
                             || line.contains("DFME_GTLS") || line.contains("DFME_POKE") || line.contains("SFLG")) {
@@ -433,8 +443,8 @@ public class Client extends JFrame {
 
                         publish(outputData);
 
-
                     }
+
                 }
             } catch (IOException e1) {
                 // TODO Auto-generated catch block

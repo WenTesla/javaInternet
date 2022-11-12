@@ -1,4 +1,4 @@
-package project5;
+package endProject;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

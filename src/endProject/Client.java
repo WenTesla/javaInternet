@@ -1,37 +1,35 @@
-package project3;
+package endProject;
 
-import java.awt.BorderLayout;
-import java.awt.EventQueue;
-
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.EmptyBorder;
-import javax.swing.JButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.SwingWorker;
 import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Properties;
+import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.awt.event.ActionEvent;
 
 
 /**
  * @author BoWen
- * @Data
+ * @Data 2022/11/10
  */
-public class server extends JFrame {
+public class Client extends JFrame {
 
 
     /**
-     * 定义各种数据
+     * 自定义各种数据
      */
 
     private static String flid = null;  // 即数据文件中每行数据的flid
@@ -51,11 +49,37 @@ public class server extends JFrame {
     private static String gate = null; // 登机口
     private static String state = null; // 登机状态
 
+
+    /**
+     * GUI
+     */
     private JPanel contentPane;
     private JTable table;
     private DefaultTableModel tm;
-    private int count=0;
+    private int count = 0;
     private ReceiveAndProcessData receiveAndProcessData;
+
+
+    //地址
+    private JTextField addressText;
+    //端口
+    private JTextField portText;
+
+    /**
+     * 有关网络协议的配置
+     */
+
+    private String procotol;
+
+    private static String TCP_Address;
+
+    private static String TCP_Port;
+
+    private static String UDP_Address;
+
+    private static String UDP_Port = "9999";
+
+//    private static
 
     /**
      * Launch the application.
@@ -64,7 +88,7 @@ public class server extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    server frame = new server();
+                    Client frame = new Client();
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -77,9 +101,11 @@ public class server extends JFrame {
      * Create the frame.
      */
 
-    public server() {
+    public Client() {
+
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setBounds(100, 100, 591, 640);
+        setTitle("航班显示系统客户端");
         contentPane = new JPanel();
         contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
         contentPane.setLayout(new BorderLayout(0, 0));
@@ -88,37 +114,50 @@ public class server extends JFrame {
         JPanel panel = new JPanel();
         contentPane.add(panel, BorderLayout.NORTH);
 
+        JComboBox comboBox = new JComboBox();
+        comboBox.addItem("TCP");
+        comboBox.addItem("UDP");
+        panel.add(comboBox);
+
+        JTextArea txtrAddress = new JTextArea();
+        txtrAddress.setText("address");
+        panel.add(txtrAddress);
+
+        addressText = new JTextField();
+        panel.add(addressText);
+        addressText.setColumns(10);
+
+        JTextArea txtrPort = new JTextArea();
+        txtrPort.setText("port");
+        panel.add(txtrPort);
+
+        portText = new JTextField();
+        panel.add(portText);
+        portText.setColumns(10);
+
+
         JButton btnNewButton = new JButton("Start");
         btnNewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-
-//				try {
-//					Socket socket = new Socket("43.140.200.253",9999);
-//					Scanner sc = new Scanner(socket.getInputStream());
-//					String line = sc.nextLine();
-//					JOptionPane.showMessageDialog(null, "连接服务器成功!"+"\n"+line);
-//
-//					while(sc.hasNextLine()) {
-//						line=sc.nextLine();
-//						tm.addRow(new String[]{(count++)+" ",line,"xxxx"});
-//					}
-//
-//				} catch (IOException e1) {
-//					// TODO Auto-generated catch block
-//					e1.printStackTrace();
-//				}
+                //处理tcp或者udp
+                procotol = (String) comboBox.getSelectedItem();
+                if ("TCP".equals(procotol)) {
+                    TCP_Address = addressText.getText();
+                    TCP_Port = portText.getText();
+                } else {
+                    UDP_Address = addressText.getText();
+                    UDP_Port = portText.getText();
+                }
 
                 if (receiveAndProcessData == null) {
-                    receiveAndProcessData= new ReceiveAndProcessData();
+                    receiveAndProcessData = new ReceiveAndProcessData(procotol, TCP_Address, TCP_Port, UDP_Address, UDP_Port);
                     receiveAndProcessData.execute();
                     btnNewButton.setEnabled(false);
 
-                }
-
-                else if (receiveAndProcessData.isCancelled()) {
+                } else if (receiveAndProcessData.isCancelled()) {
                     btnNewButton.setEnabled(true);
                     receiveAndProcessData.cancel(false);
-                    receiveAndProcessData=null;
+                    receiveAndProcessData = null;
 
                 }
 
@@ -137,13 +176,12 @@ public class server extends JFrame {
         btnNewButton_1.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
 
-                if(receiveAndProcessData!=null && !receiveAndProcessData.isCancelled()) {
+                if (receiveAndProcessData != null && !receiveAndProcessData.isCancelled()) {
                     receiveAndProcessData.cancel(true);
                     btnNewButton_1.setText("continue");
 
                     System.out.println("停止");
-                }
-                else {
+                } else {
                     receiveAndProcessData.cancel(false);
                     btnNewButton_1.setText("Pause");
 
@@ -157,12 +195,12 @@ public class server extends JFrame {
         contentPane.add(scrollPane, BorderLayout.CENTER);
 
         table = new JTable();
-        tm=new DefaultTableModel(
-                new Object[][] {
-                        {null, null, null, null, null, null,null,null,null},
+        tm = new DefaultTableModel(
+                new Object[][]{
+                        {null, null, null, null, null, null, null, null, null},
                 },
-                new String[] {
-                         "航班号", "共享航班号", "中转站", "终点站", "预计起飞", "实际起飞","登记口","备注"
+                new String[]{
+                        "航班号", "共享航班号", "中转站", "终点站", "预计起飞", "实际起飞", "登记口", "备注"
                 }
         );
 
@@ -173,20 +211,35 @@ public class server extends JFrame {
         scrollPane.setViewportView(table);
 
 
-
     }
-    class ReceiveAndProcessData extends SwingWorker<String, String[]>{
 
-        String[] outputData= new String[10];
+    class ReceiveAndProcessData extends SwingWorker<String, String[]> {
+
+        String[] outputData = new String[10];
 
         InputStream inputStream;
 
         Properties airports = new Properties();
 
+        /**
+         * 有关网络协议的配置
+         */
+
+        private String procotol;
+
+        private String TCP_Address;
+
+        private String TCP_Port;
+
+        private String UDP_Address;
+
+        private String UDP_Port = "9999";
+
+
         {
             try {
                 inputStream = new FileInputStream("airport.txt");
-                airports.load(new InputStreamReader(inputStream,"UTF-8"));
+                airports.load(new InputStreamReader(inputStream, "UTF-8"));
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             } catch (UnsupportedEncodingException e) {
@@ -196,14 +249,27 @@ public class server extends JFrame {
             }
         }
 
-
-
-
+        /**
+         * 处理传入的参数
+         *
+         * @param procotol
+         * @param tcp_address
+         * @param tcp_port
+         * @param udp_address
+         * @param udp_port
+         */
+        public ReceiveAndProcessData(String procotol, String tcp_address, String tcp_port, String udp_address, String udp_port) {
+            this.procotol = procotol;
+            this.TCP_Address = tcp_address;
+            this.TCP_Port = tcp_port;
+            this.UDP_Address = udp_address;
+            this.UDP_Port = udp_port;
+        }
 
 
         @Override
         protected void process(List<String[]> chunks) {
-            for (String[] data:chunks){
+            for (String[] data : chunks) {
 
                 if (data != null) {
                     System.out.println(Arrays.toString(data));
@@ -213,10 +279,12 @@ public class server extends JFrame {
 
 
         }
+
         /**
          * 开始分析每一行
+         *
          * @param line
-         * @return
+         * @return String[]
          */
         private String[] analysisData(String line) {
 
@@ -297,7 +365,6 @@ public class server extends JFrame {
 //                        "共享航班号2: " + sfawTwo + sfnoTwo + "\t"+  "共享航班号3: " + sfawThree + sfnoThree + "\t"  );
                 }
             }
-
 
 
             /**
@@ -414,40 +481,95 @@ public class server extends JFrame {
                 state = "航班取消";
 
 
-
-
-            return new String[]{flightNumber,sfnoOne,transferStation,destinationStation,planToFlyTime,actualFlyTime,gate,state};
+            return new String[]{flightNumber, sfnoOne, transferStation, destinationStation, planToFlyTime, actualFlyTime, gate, state};
         }
 
         @Override
         protected String doInBackground() throws Exception {
+            String totalLine = null;
+            String line;
+//            procotol=
+            /**
+             * UDP协议
+             */
+            if ("UDP".equals(procotol)) {
+                try (
+                        DatagramSocket socket = new DatagramSocket(0);
+                ) {
+                    InetSocketAddress server = new InetSocketAddress("localHost", 9999);
+                    //发完请求包
+                    DatagramPacket requestData = new DatagramPacket(new byte[1], 1, server);
+                    socket.send(requestData);
+                    //设置超时时间(10s)
+                    socket.setSoTimeout(10000);
+                    byte[] buffer = new byte[8 * 1024];
+                    DatagramPacket responseData = new DatagramPacket(buffer, buffer.length);
+                    socket.receive(responseData);
+                    //转换为字符串
+                    totalLine = new String(responseData.getData(), responseData.getOffset(), responseData.getLength());
 
-            // TODO Auto-generated method stub
-            try {
+                    System.out.println(totalLine);
+                    tm.setRowCount(0);
+                    //弹窗显示信息
+                    JOptionPane.showMessageDialog(null, "连接服务器成功\r\n" + totalLine);
+                    while (!receiveAndProcessData.isCancelled()) {
+                        socket.receive(responseData);
+                        line = new String(responseData.getData(), responseData.getOffset(), responseData.getLength());
+                        System.out.println(line);
+                        if ("no data!".equals(line))
+                            break;
+
+                        /**
+                         * 如果有需要的信息
+                         */
+
+                        if (line.contains("DFME_AIRL") || line.contains("DFME_BORE") || line.contains("DFME_CANE")
+                                || line.contains("DFME_DLYE") || line.contains("DFME_FPTT") || line.contains("DFME_FETT")
+                                || line.contains("DFME_GTLS") || line.contains("DFME_POKE") || line.contains("SFLG")) {
+                            outputData = analysisData(line);
+
+                            publish(outputData);
+
+
+                        }
+                    }
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
+                }
+
+            } else if ("TCP".equals(procotol)) {
+                try {
 //                Socket clientSockerSocket = new Socket("43.140.200.253",9999);
-				Socket clientSockerSocket = new Socket("localHost",9999);
-                Scanner sc = new Scanner(clientSockerSocket.getInputStream());
-                String line = sc.nextLine();
-                JOptionPane.showMessageDialog(null, "连接服务器成功!");
+                    Socket clientSockerSocket = new Socket("localHost", 9999);
+                    Scanner sc = new Scanner(clientSockerSocket.getInputStream());
+                    line = sc.nextLine();
+                    JOptionPane.showMessageDialog(null, "连接服务器成功!" + "\n" + line);
 
-                while(sc.hasNextLine() && !isCancelled()) {
-                    line=sc.nextLine();
-                    /**
-                     * 如果有需要的信息
-                     */
-                    if (line.contains("DFME_AIRL") || line.contains("DFME_BORE") || line.contains("DFME_CANE")
-                            || line.contains("DFME_DLYE") || line.contains("DFME_FPTT") || line.contains("DFME_FETT")
-                            || line.contains("DFME_GTLS") || line.contains("DFME_POKE") || line.contains("SFLG")) {
-                        outputData = analysisData(line);
+                    while (sc.hasNextLine() && !isCancelled()) {
+                        line = sc.nextLine();
 
-                        publish(outputData);
+                        /**
+                         * 如果有需要的信息
+                         */
+
+                        if (line.contains("DFME_AIRL") || line.contains("DFME_BORE") || line.contains("DFME_CANE")
+                                || line.contains("DFME_DLYE") || line.contains("DFME_FPTT") || line.contains("DFME_FETT")
+                                || line.contains("DFME_GTLS") || line.contains("DFME_POKE") || line.contains("SFLG")) {
+                            outputData = analysisData(line);
+
+                            publish(outputData);
+
+                        }
 
                     }
-
+                } catch (IOException e1) {
+                    // TODO Auto-generated catch block
+                    e1.printStackTrace();
                 }
-            } catch (IOException e1) {
-                // TODO Auto-generated catch block
-                e1.printStackTrace();
+
+            } else {
+                throw new Exception("网络请求异常");
             }
             return Integer.toString(count);
         }
