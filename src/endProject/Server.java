@@ -7,22 +7,26 @@ import javax.swing.border.EmptyBorder;
 import java.awt.Color;
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 /**
  * 服务器的GUI界面
  * 用于选择TCP或者UDP协议
+ * 选择address和port
  *
  * @author BoWen
- * @version 1.0
- * @date 2022/11/12
+ * @version 1.1
+ * @date 2022/11/13
  */
 public class Server extends JFrame {
 
     /**
      * GUI配置
      */
+
     private JPanel contentPane;
     private JTextField txtPleaseChooseProtol;
     private JTextField addressText;
@@ -38,7 +42,7 @@ public class Server extends JFrame {
 
     private static String TCP_Address;
 
-    private static String TCP_Port;
+    private static String TCP_Port = "9999";
 
     private static String UDP_Address;
 
@@ -48,9 +52,17 @@ public class Server extends JFrame {
     private static UdpServer udpServer;
 
     public static void setUdpServer(String UDP_Address, String UDP_Port) {
-        //
+
+        //处理端口号
         int port = Integer.parseInt(UDP_Port);
-        udpServer = new UdpServer(8192, port);
+        InetAddress inetAddress = null;
+        //处理address
+        try {
+            inetAddress = InetAddress.getByName(UDP_Address);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+        udpServer = new UdpServer(8192,inetAddress ,port);
 
     }
 
@@ -139,6 +151,14 @@ public class Server extends JFrame {
                 procotol = (String) comboBox.getSelectedItem();
                 //如果是TCP
                 if ("TCP".equals(procotol)) {
+                    if ("Launch Server".equals(btnNewButton_1.getText())) {
+                        TCP_Address=addressText.getText();
+                        if (!"".equals(portText.getText()))
+                            TCP_Port=portText.getText();
+
+
+                    }
+
 
                 }
                 //如果是UDP
@@ -146,7 +166,6 @@ public class Server extends JFrame {
                     //启动线程
                     if ("Launch Server".equals(btnNewButton_1.getText())) {
                         //获取值
-
                         UDP_Address = addressText.getText();
                         if (!"".equals(portText.getText()))
                             UDP_Port = portText.getText();

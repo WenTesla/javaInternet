@@ -3,6 +3,7 @@ package endProject;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,6 +16,8 @@ import java.util.logging.Logger;
  */
 
 public abstract class AbstractUdpServer implements Runnable  {
+
+    private InetAddress inetAddress;
     //字节长度
     private int bufferSize;
     //端口
@@ -33,6 +36,12 @@ public abstract class AbstractUdpServer implements Runnable  {
         this(8192,port);
     }
 
+
+    public AbstractUdpServer(int bufferSize,InetAddress inetAddress,int port){
+        this.bufferSize=bufferSize;
+        this.inetAddress=inetAddress;
+        this.port=port;
+    }
     @Override
     public void run() {
         byte[] buffer = new byte[bufferSize];

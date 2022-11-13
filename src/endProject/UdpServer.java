@@ -3,6 +3,7 @@ package endProject;
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 
 /**
  * 继承UDPServer的类
@@ -26,6 +27,9 @@ public class UdpServer extends AbstractUdpServer {
         super(DEFAULT_PORT);
     }
 
+    public UdpServer(int bufferSize, InetAddress inetAddress,int port){
+        super(bufferSize,inetAddress,port);
+    }
     @Override
     protected void respond(DatagramSocket socket, DatagramPacket incoming) {
         //为每一个开启线程

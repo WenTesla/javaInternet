@@ -7,10 +7,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.*;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetSocketAddress;
-import java.net.Socket;
+import java.net.*;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Properties;
@@ -150,13 +147,14 @@ public class Client extends JFrame {
                 }
 
                 if (receiveAndProcessData == null) {
+
                     receiveAndProcessData = new ReceiveAndProcessData(procotol, TCP_Address, TCP_Port, UDP_Address, UDP_Port);
                     receiveAndProcessData.execute();
                     btnNewButton.setEnabled(false);
 
                 } else if (receiveAndProcessData.isCancelled()) {
                     btnNewButton.setEnabled(true);
-                    receiveAndProcessData.cancel(false);
+                    receiveAndProcessData.cancel(true);
                     receiveAndProcessData = null;
 
                 }
@@ -183,6 +181,7 @@ public class Client extends JFrame {
                     System.out.println("停止");
                 } else {
                     receiveAndProcessData.cancel(false);
+                    receiveAndProcessData.execute();
                     btnNewButton_1.setText("Pause");
 
                 }
@@ -233,7 +232,7 @@ public class Client extends JFrame {
 
         private String UDP_Address;
 
-        private String UDP_Port = "9999";
+        private String UDP_Port ;
 
 
         {
@@ -496,7 +495,9 @@ public class Client extends JFrame {
                 try (
                         DatagramSocket socket = new DatagramSocket(0);
                 ) {
-                    InetSocketAddress server = new InetSocketAddress("localHost", 9999);
+//                    InetSocketAddress server = new InetSocketAddress("localHost", 9999);
+//                    InetSocketAddress server = new InetSocketAddress("localHost", Integer.parseInt(UDP_Port));
+                    InetSocketAddress server = new InetSocketAddress(UDP_Address, Integer.parseInt(UDP_Port));
                     //发完请求包
                     DatagramPacket requestData = new DatagramPacket(new byte[1], 1, server);
                     socket.send(requestData);
@@ -504,7 +505,9 @@ public class Client extends JFrame {
                     socket.setSoTimeout(10000);
                     byte[] buffer = new byte[8 * 1024];
                     DatagramPacket responseData = new DatagramPacket(buffer, buffer.length);
-                    socket.receive(responseData);
+
+                        socket.receive(responseData);
+
                     //转换为字符串
                     totalLine = new String(responseData.getData(), responseData.getOffset(), responseData.getLength());
 
@@ -533,10 +536,17 @@ public class Client extends JFrame {
 
                         }
                     }
-                } catch (IOException e1) {
+                }
+                //处理超时异常
+                catch (SocketTimeoutException socketTimeoutException){
+//                    System.out.println("超时");
+                    JOptionPane.showMessageDialog(null,"连接超时");
+                }
+                catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
+
 
             } else if ("TCP".equals(procotol)) {
                 try {
