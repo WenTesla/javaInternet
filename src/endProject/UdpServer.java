@@ -30,6 +30,10 @@ public class UdpServer extends AbstractUdpServer {
     public UdpServer(int bufferSize, InetAddress inetAddress,int port){
         super(bufferSize,inetAddress,port);
     }
+    public void setShutDown(){
+        this.shutDown();
+
+    }
     @Override
     protected void respond(DatagramSocket socket, DatagramPacket incoming) {
         //为每一个开启线程

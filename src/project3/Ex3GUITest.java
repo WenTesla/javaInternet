@@ -144,6 +144,7 @@ public class Ex3GUITest extends JFrame {
 				JOptionPane.showMessageDialog(null, "���ӷ������ɹ�\r\n" + totalLines);
 				while(sc.hasNextLine()) {
 					line = sc.nextLine();
+					System.out.println(line);
 //					��������ڿ���̨�����������table�����
 //					System.out.println(line);
 //					��Ҫ���߳̽��������ϵ�������Ҫ�����ͼ�ν��棬һ���̸߳����£�������ʾ�������������ˣ������رռ���ʧЧ��
@@ -170,8 +171,10 @@ public class Ex3GUITest extends JFrame {
 //		��ô�������϶��Ž��������ѽ������List
 		protected void process(List<String> chunks) {
 //			Ҫ��������,:chunks��˼�������line��,�ǲ���List�͵�chunks
-			for(String line:chunks)
-				tm.addRow(new String[] {(count++) + " ", line, line });
+			for(String line:chunks) {
+				tm.addRow(new String[]{(count++) + " ", line, line});
+				System.out.println(line);
+			}
 		}
 	}
 }

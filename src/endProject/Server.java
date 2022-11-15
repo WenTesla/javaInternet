@@ -16,10 +16,10 @@ import java.util.concurrent.FutureTask;
  * 服务器的GUI界面
  * 用于选择TCP或者UDP协议
  * 选择address和port
- *
+ * 正式版
  * @author BoWen
- * @version 1.1
- * @date 2022/11/13
+ * @version 1.2
+ * @date 2022/11/15
  */
 public class Server extends JFrame {
 
@@ -38,6 +38,7 @@ public class Server extends JFrame {
     /**
      * 用户配置
      */
+
     private String procotol;
 
     private static String TCP_Address;
@@ -48,7 +49,9 @@ public class Server extends JFrame {
 
     private static String UDP_Port = "9999";
 
-
+    /**
+     * UDP 服务器
+     */
     private static UdpServer udpServer;
 
     public static void setUdpServer(String UDP_Address, String UDP_Port) {
@@ -77,7 +80,6 @@ public class Server extends JFrame {
     //创建线程对象
     Thread th = new Thread(udpServerThread);
 
-    //
 
 
     /**
@@ -126,9 +128,13 @@ public class Server extends JFrame {
          */
         btnNewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                JOptionPane.showConfirmDialog(null, "这是确认对话框吗？", "提示", JOptionPane.OK_OPTION, JOptionPane.QUESTION_MESSAGE);    //确认对话框
-//                if (JOptionPane.)
-                System.exit(EXIT_ON_CLOSE);
+                // 0->yes 1->no -1->close
+                int confirmDialog = JOptionPane.showConfirmDialog(null, "Are you sure close the server?", "Warn!", JOptionPane.OK_OPTION, JOptionPane.QUESTION_MESSAGE);//确认对话框
+                if (confirmDialog == 0) {
+                    //发送停止数据
+                    udpServer.setShutDown();
+                    System.exit(EXIT_ON_CLOSE);
+                }
             }
         });
         btnNewButton.setBounds(129, 371, 127, 32);
@@ -149,7 +155,9 @@ public class Server extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 //获取当前下拉框的值
                 procotol = (String) comboBox.getSelectedItem();
-                //如果是TCP
+                /**
+                 * 如果是TCP
+                 */
                 if ("TCP".equals(procotol)) {
                     if ("Launch Server".equals(btnNewButton_1.getText())) {
                         TCP_Address=addressText.getText();
@@ -157,11 +165,15 @@ public class Server extends JFrame {
                             TCP_Port=portText.getText();
 
 
+
                     }
+                    else {
 
-
+                    }
                 }
-                //如果是UDP
+                /**
+                 * 如果是UDP
+                 */
                 else {
                     //启动线程
                     if ("Launch Server".equals(btnNewButton_1.getText())) {
@@ -169,8 +181,6 @@ public class Server extends JFrame {
                         UDP_Address = addressText.getText();
                         if (!"".equals(portText.getText()))
                             UDP_Port = portText.getText();
-
-
                         setUdpServer(UDP_Address, UDP_Port);
                         th.start();
                         btnNewButton_1.setText("Pause Server");
@@ -231,4 +241,3 @@ public class Server extends JFrame {
 
 
 }
-//class Udp extends SwingWorker<>

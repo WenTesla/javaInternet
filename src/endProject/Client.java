@@ -20,13 +20,14 @@ import java.util.stream.Stream;
 
 /**
  * @author BoWen
- * @Data 2022/11/10
+ * @version 1.2
+ * @Data 2022/11/15
  */
 public class Client extends JFrame {
 
 
     /**
-     * 自定义各种数据
+     * 自定义各种航班数据
      */
 
     private static String flid = null;  // 即数据文件中每行数据的flid
@@ -76,7 +77,6 @@ public class Client extends JFrame {
 
     private static String UDP_Port = "9999";
 
-//    private static
 
     /**
      * Launch the application.
@@ -134,6 +134,9 @@ public class Client extends JFrame {
 
 
         JButton btnNewButton = new JButton("Start");
+        /**
+         * 服务器开启
+         */
         btnNewButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 //处理tcp或者udp
@@ -145,18 +148,23 @@ public class Client extends JFrame {
                     UDP_Address = addressText.getText();
                     UDP_Port = portText.getText();
                 }
-
+                /**
+                 * 三种情况
+                 * 1.第一次处理
+                 * 2.被暂停
+                 * 3.客户端超时
+                 */
                 if (receiveAndProcessData == null) {
-
                     receiveAndProcessData = new ReceiveAndProcessData(procotol, TCP_Address, TCP_Port, UDP_Address, UDP_Port);
                     receiveAndProcessData.execute();
-                    btnNewButton.setEnabled(false);
-
+//                    btnNewButton.setEnabled(false);
                 } else if (receiveAndProcessData.isCancelled()) {
-                    btnNewButton.setEnabled(true);
+//                    btnNewButton.setEnabled(true);
                     receiveAndProcessData.cancel(true);
                     receiveAndProcessData = null;
-
+                } else {
+                    receiveAndProcessData = new ReceiveAndProcessData(procotol, TCP_Address, TCP_Port, UDP_Address, UDP_Port);
+                    receiveAndProcessData.execute();
                 }
 
             }
@@ -232,7 +240,7 @@ public class Client extends JFrame {
 
         private String UDP_Address;
 
-        private String UDP_Port ;
+        private String UDP_Port;
 
 
         {
@@ -495,8 +503,6 @@ public class Client extends JFrame {
                 try (
                         DatagramSocket socket = new DatagramSocket(0);
                 ) {
-//                    InetSocketAddress server = new InetSocketAddress("localHost", 9999);
-//                    InetSocketAddress server = new InetSocketAddress("localHost", Integer.parseInt(UDP_Port));
                     InetSocketAddress server = new InetSocketAddress(UDP_Address, Integer.parseInt(UDP_Port));
                     //发完请求包
                     DatagramPacket requestData = new DatagramPacket(new byte[1], 1, server);
@@ -505,12 +511,9 @@ public class Client extends JFrame {
                     socket.setSoTimeout(10000);
                     byte[] buffer = new byte[8 * 1024];
                     DatagramPacket responseData = new DatagramPacket(buffer, buffer.length);
-
-                        socket.receive(responseData);
-
+                    socket.receive(responseData);
                     //转换为字符串
                     totalLine = new String(responseData.getData(), responseData.getOffset(), responseData.getLength());
-
                     System.out.println(totalLine);
                     tm.setRowCount(0);
                     //弹窗显示信息
@@ -538,11 +541,10 @@ public class Client extends JFrame {
                     }
                 }
                 //处理超时异常
-                catch (SocketTimeoutException socketTimeoutException){
+                catch (SocketTimeoutException socketTimeoutException) {
 //                    System.out.println("超时");
-                    JOptionPane.showMessageDialog(null,"连接超时");
-                }
-                catch (IOException e1) {
+                    JOptionPane.showMessageDialog(null, "连接超时");
+                } catch (IOException e1) {
                     // TODO Auto-generated catch block
                     e1.printStackTrace();
                 }
@@ -550,7 +552,6 @@ public class Client extends JFrame {
 
             } else if ("TCP".equals(procotol)) {
                 try {
-//                Socket clientSockerSocket = new Socket("43.140.200.253",9999);
                     Socket clientSockerSocket = new Socket("localHost", 9999);
                     Scanner sc = new Scanner(clientSockerSocket.getInputStream());
                     line = sc.nextLine();
