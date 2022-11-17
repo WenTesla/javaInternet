@@ -4,7 +4,9 @@
 
 src下每个包代表一个实验
 
-大作业在endProject包下
+大作业在endProject/End包下
+
+目前：
 
 
 

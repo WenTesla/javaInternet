@@ -1,4 +1,4 @@
-package endProject;
+package End;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -143,12 +143,12 @@ public class Client extends JFrame {
                 procotol = (String) comboBox.getSelectedItem();
                 if ("TCP".equals(procotol)) {
                     TCP_Address = addressText.getText();
+                    if (!"".equals(portText.getText()))
                     TCP_Port = portText.getText();
                 } else {
-
                     UDP_Address = addressText.getText();
                     //非空则设置UDP端口为默认端口
-                    if ("UDP".equals(portText.getText()))
+                    if (!"".equals(portText.getText()))
                         UDP_Port = portText.getText();
                 }
                 /**
@@ -207,20 +207,13 @@ public class Client extends JFrame {
         table = new JTable();
         tm = new DefaultTableModel(
                 new Object[][]{
-                        {null, null, null, null, null, null, null, null, null},
                 },
                 new String[]{
                         "航班号", "共享航班号", "中转站", "终点站", "预计起飞", "实际起飞", "登记口", "备注"
                 }
         );
-
-
         table.setModel(tm);
-
-//		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         scrollPane.setViewportView(table);
-
-
     }
 
     class ReceiveAndProcessData extends SwingWorker<String, String[]> {
@@ -237,7 +230,7 @@ public class Client extends JFrame {
 
         private String procotol;
 
-        private String TCP_Address;
+        private String TCP_Address = "localHost";
 
         private String TCP_Port;
 
@@ -280,7 +273,6 @@ public class Client extends JFrame {
         @Override
         protected void process(List<String[]> chunks) {
             for (String[] data : chunks) {
-
                 if (data != null) {
                     System.out.println(Arrays.toString(data));
                     tm.addRow(data);
@@ -555,10 +547,10 @@ public class Client extends JFrame {
             } else if ("TCP".equals(procotol)) {
                 try {
                     Socket clientSockerSocket = new Socket(TCP_Address, Integer.parseInt(TCP_Port));
+                    System.out.println(TCP_Address+":"+TCP_Port);
                     Scanner sc = new Scanner(clientSockerSocket.getInputStream());
                     line = sc.nextLine();
-                    JOptionPane.showMessageDialog(null, "连接服务器成功!" + "\n" + line);
-
+                    JOptionPane.showMessageDialog(null, "连接服务器成功!" + "\n" );
                     while (sc.hasNextLine() && !isCancelled()) {
                         line = sc.nextLine();
 
