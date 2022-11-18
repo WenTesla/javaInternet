@@ -10,13 +10,12 @@ import javax.swing.table.DefaultTableModel;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.FutureTask;
 
 /**
  * 重构后的Server GUI
+ *
  * @author BoWen
  * @version 2.0
  * @date 2022/11/17
@@ -61,14 +60,14 @@ public class server extends JFrame {
 
         //处理端口号
         int port = Integer.parseInt(UDP_Port);
-        InetAddress inetAddress = null;
-        //处理address
-        try {
-            inetAddress = InetAddress.getByName(UDP_Address);
-        } catch (UnknownHostException e) {
-            throw new RuntimeException(e);
-        }
-        udpServer = new UdpServer(8192, inetAddress, port);
+//        InetAddress inetAddress = null;
+//        //处理address
+//        try {
+//            inetAddress = InetAddress.getByName(UDP_Address);
+//        } catch (UnknownHostException e) {
+//            throw new RuntimeException(e);
+//        }
+        udpServer = new UdpServer(8192, UDP_Address, port);
 
     }
 
@@ -90,7 +89,7 @@ public class server extends JFrame {
 
     private void setTcpServer(String TCP_Address, String TCP_Port) {
         try {
-            tcpServer = new TcpServer(TCP_Address,TCP_Port);
+            tcpServer = new TcpServer(TCP_Address, TCP_Port);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -188,6 +187,8 @@ public class server extends JFrame {
         TCP_shutDownButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                System.out.println("shutDown");
+                TcpServer.TCP_currentThreadIsShutDown = true;
 
             }
         });
@@ -249,7 +250,7 @@ public class server extends JFrame {
                 //非空则设置UDP端口为默认端口
                 if ("UDP".equals(UDP_portText.getText()))
                     UDP_Port = UDP_portText.getText();
-                System.out.println(UDP_Address + ":" + UDP_Port);
+//                System.out.println(UDP_Address + ":" + UDP_Port);
                 setUdpServer(UDP_Address, UDP_Port);
                 UDP_thread.start();
                 UDP_LaunchButton.setText("Pause Server");
@@ -266,6 +267,7 @@ public class server extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 System.out.println("ShutDown!");
+                FDSDataHandler.UDP_currentThreadIsShutDown = true;
                 //清空数据
                 UDP_table.removeAll();
 

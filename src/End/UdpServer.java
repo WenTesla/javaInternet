@@ -34,6 +34,10 @@ public class UdpServer extends AbstractUdpServer {
     public UdpServer(int bufferSize, InetAddress inetAddress,int port){
         super(bufferSize,inetAddress,port);
     }
+
+    public UdpServer(int bufferSize, String address,int port){
+        super(bufferSize,address,port);
+    }
     public void setShutDown(){
         this.shutDown();
 
@@ -64,7 +68,11 @@ class FDSDataHandler implements Runnable {
     private String lineInfo;
     private byte[] lineData;
 
+
     volatile static int connectingCount = 0;
+
+    volatile static boolean UDP_currentThreadIsShutDown = false;
+
     FileReader fileReader;
 
 
@@ -104,14 +112,21 @@ class FDSDataHandler implements Runnable {
         while (count < 10000) {
             try {
                 while ((lineInfo = bufferedReader.readLine()) != null) {
-
+                    if (UDP_currentThreadIsShutDown){
+                        System.out.println("停止线程!");
+                        lineData = "shutDown!".getBytes();
+                        incoming.setData(lineData);
+                        incoming.setLength(lineData.length);
+                        socket.send(incoming);
+                        return;
+                    }
                     lineData = lineInfo.getBytes();
                     incoming.setData(lineData);
                     incoming.setLength(lineData.length);
                     socket.send(incoming);
 
-                    System.out.println("发送客户端:" + incoming.getSocketAddress() + "第" + count + "行数据");
-                    System.out.println("数据如下" + lineInfo);
+//                    System.out.println("发送客户端:" + incoming.getSocketAddress() + "第" + count + "行数据");
+//                    System.out.println("数据如下" + lineInfo);
                     count++;
                     Thread.sleep(100);
                 }

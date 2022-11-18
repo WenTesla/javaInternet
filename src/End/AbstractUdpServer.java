@@ -1,10 +1,7 @@
 package End;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -42,11 +39,20 @@ public abstract class AbstractUdpServer implements Runnable  {
         this.inetAddress=inetAddress;
         this.port=port;
     }
+    public AbstractUdpServer(int bufferSize,String address,int port){
+        this.bufferSize=bufferSize;
+        this.port=port;
+        try {
+            this.inetAddress = InetAddress.getByName(address);
+        } catch (UnknownHostException e) {
+            throw new RuntimeException(e);
+        }
+    }
     @Override
     public void run() {
         byte[] buffer = new byte[bufferSize];
-        try (DatagramSocket socket = new DatagramSocket(port)){
-            logger.log(Level.INFO,"服务器启动成功！\n"+"端口号:"+port);
+        try (DatagramSocket socket = new DatagramSocket(port,inetAddress)){
+            logger.log(Level.INFO,"UDP服务器启动成功！\n"+"地址: "+inetAddress.getHostAddress()+" 端口号: "+port);
             while (true) {
                 //先检查变量
                 if (isShutDown) {

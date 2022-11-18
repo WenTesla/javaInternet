@@ -40,7 +40,7 @@ public abstract class AbstractTcpServer implements Runnable{
         serverSocketChannel.configureBlocking(false);
         // 3.serverSocket向Selector注册“接受连接就绪事件”
         serverSocketChannel.register(selector, SelectionKey.OP_ACCEPT);
-        logger.log(Level.INFO, "TCP服务器启动成功！\n" +"地址:"+address+"端口号:" + port);
+
     }
 
 

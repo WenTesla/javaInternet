@@ -20,8 +20,9 @@ public class TcpServer extends AbstractTcpServer {
     private static int connectingCount = 0;
     private ByteBuffer fileBuffer;
     // 用RandomAccessFile以可读写模式加载flightdata.txt
-    private RandomAccessFile randomAccessFile = new RandomAccessFile(new File("fdsdata2.txt"), "rw");
+    private RandomAccessFile randomAccessFile = new RandomAccessFile(new File("fdsdata2.txt"), "r");
 
+    static volatile boolean TCP_currentThreadIsShutDown = false;
     public TcpServer(String address, String port) throws Exception {
         super(address, Integer.parseInt(port));
     }
@@ -32,6 +33,7 @@ public class TcpServer extends AbstractTcpServer {
 
     @Override
     protected void respond() {
+        logger.log(Level.INFO, "TCP服务器启动成功！\n" +"地址:"+address+" 端口号:" + port);
         while (true) {
             SelectionKey key = null;
 
@@ -54,6 +56,7 @@ public class TcpServer extends AbstractTcpServer {
                         System.out.println(socketChannel.getRemoteAddress() + "已连接"); // 客户端地址
 
                         // 此步用于获取randomAccessFile中总的字节长度，便于下一步的ByteBuffer空间分配
+                        //5282288
                         fileBuffer = ByteBuffer.allocate(5318324); // 重新分配一个大小与randomAccessFile相同的ByteBuffer，单位是字节
                         randomAccessFile.seek(0); // 设置文件指针到文件的开头，实现回头读
 
@@ -74,7 +77,13 @@ public class TcpServer extends AbstractTcpServer {
                     if (key.isWritable()) {
                         SocketChannel socketChannel = (SocketChannel) key.channel();
                         ByteBuffer bufferToSend = (ByteBuffer) key.attachment(); // 取出附件
-
+                        if (TCP_currentThreadIsShutDown){
+                            // 发送结束
+                            byte[] endMessage = "shutDown!".getBytes();
+                            ByteBuffer endBuffer = ByteBuffer.wrap(endMessage);
+                            socketChannel.write(endBuffer);
+                            continue;
+                        }
                         if (bufferToSend.hasRemaining()) {
                             socketChannel.write(bufferToSend);
                         } else {
