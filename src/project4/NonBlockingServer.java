@@ -15,7 +15,7 @@ public class NonBlockingServer {
     private Selector selector;
     private ByteBuffer fileBuffer;
     // 用RandomAccessFile以可读写模式加载flightdata.txt
-    private RandomAccessFile randomAccessFile = new RandomAccessFile(new File("fdsdata2.txt"), "rw");
+    private RandomAccessFile randomAccessFile = new RandomAccessFile(new File("fdsdata2.txt"), "r");
 
     public NonBlockingServer() throws Exception {
         // 1.创建Selector对象，提供监听服务

@@ -2,6 +2,8 @@ package End;
 
 import java.io.IOException;
 import java.net.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,6 +25,9 @@ public abstract class AbstractUdpServer implements Runnable  {
     private final Logger logger=Logger.getLogger(AbstractUdpServer.class.getCanonicalName());
     //是否关闭
     private volatile boolean isShutDown=false;
+
+    //提供指定最大线程数量的线程池
+    public static ExecutorService UDP_theadPool = Executors.newFixedThreadPool(10);
 
     public AbstractUdpServer(int bufferSize, int port) {
         this.bufferSize=bufferSize;
@@ -52,7 +57,7 @@ public abstract class AbstractUdpServer implements Runnable  {
     public void run() {
         byte[] buffer = new byte[bufferSize];
         try (DatagramSocket socket = new DatagramSocket(port,inetAddress)){
-            logger.log(Level.INFO,"UDP服务器启动成功！\n"+"地址: "+inetAddress.getHostAddress()+" 端口号: "+port);
+            logger.log(Level.INFO,"UDP服务器启动成功！\n"+"地址: "+inetAddress.getHostName()+" 端口号: "+port);
             while (true) {
                 //先检查变量
                 if (isShutDown) {

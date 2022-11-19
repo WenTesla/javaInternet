@@ -17,10 +17,11 @@ import java.util.concurrent.FutureTask;
  * 重构后的Server GUI
  *
  * @author BoWen
- * @version 2.0
- * @date 2022/11/17
+ * @version 2.1
+ * @date 2022/11/19
  */
-public class server extends JFrame {
+public class Server extends JFrame {
+
     /**
      * GUI
      */
@@ -41,6 +42,7 @@ public class server extends JFrame {
     /**
      * 有关网络协议的配置
      */
+
     private String procotol;
 
     private static String TCP_Address = "localHost";
@@ -60,13 +62,6 @@ public class server extends JFrame {
 
         //处理端口号
         int port = Integer.parseInt(UDP_Port);
-//        InetAddress inetAddress = null;
-//        //处理address
-//        try {
-//            inetAddress = InetAddress.getByName(UDP_Address);
-//        } catch (UnknownHostException e) {
-//            throw new RuntimeException(e);
-//        }
         udpServer = new UdpServer(8192, UDP_Address, port);
 
     }
@@ -115,7 +110,7 @@ public class server extends JFrame {
         EventQueue.invokeLater(new Runnable() {
             public void run() {
                 try {
-                    server frame = new server();
+                    Server frame = new Server();
                     frame.setVisible(true);
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -127,7 +122,7 @@ public class server extends JFrame {
     /**
      * Create the frame.
      */
-    public server() {
+    public Server() {
         setTitle("Server");
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -166,11 +161,15 @@ public class server extends JFrame {
         TCP_launchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                //TCP address 非空
                 if (!"".equals(TCP_addressText.getText()))
                     TCP_Address = TCP_addressText.getText();
+                //TCP port 非空
                 if (!"".equals(TCP_portText.getText()))
                     TCP_Port = TCP_portText.getText();
+                //配置TCP服务器
                 setTcpServer(TCP_Address, TCP_Port);
+                //启动TCP服务器的线程
                 TCP_thread.start();
                 System.out.println("TCP" + TCP_Address + ":" + TCP_Port);
                 TCP_launchButton.setText("Pause Server");
@@ -246,12 +245,15 @@ public class server extends JFrame {
         UDP_LaunchButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                UDP_Address = UDP_addressText.getText();
-                //非空则设置UDP端口为默认端口
-                if ("UDP".equals(UDP_portText.getText()))
+                //UDP address 非空
+                if (!"".equals(UDP_addressText.getText()))
+                    UDP_Address = UDP_addressText.getText();
+                //UDP port 非空
+                if (!"".equals(UDP_portText.getText()))
                     UDP_Port = UDP_portText.getText();
-//                System.out.println(UDP_Address + ":" + UDP_Port);
+                //配置UDP服务器
                 setUdpServer(UDP_Address, UDP_Port);
+                //UDO服务器启动
                 UDP_thread.start();
                 UDP_LaunchButton.setText("Pause Server");
             }
@@ -268,11 +270,9 @@ public class server extends JFrame {
             public void actionPerformed(ActionEvent e) {
                 System.out.println("ShutDown!");
                 FDSDataHandler.UDP_currentThreadIsShutDown = true;
+                UdpServer.UDP_theadPool.shutdown();
                 //清空数据
-                UDP_table.removeAll();
-
-//                    System.exit(0);
-
+                UDP_tm.getDataVector().removeAllElements();
             }
         });
         UDP_shutDownButton.setForeground(Color.RED);

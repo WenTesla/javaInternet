@@ -44,13 +44,11 @@ public class UdpServer extends AbstractUdpServer {
     }
     @Override
     protected void respond(DatagramSocket socket, DatagramPacket incoming) {
-        //为每一个开启线程
-        new Thread(new FDSDataHandler(socket, incoming)).start();
-
+        //向线程池添加线程
+        UDP_theadPool.execute(new FDSDataHandler(socket, incoming));
     }
 
     public static void main(String[] args) {
-
         new Thread(new UdpServer()).start();
     }
 }
@@ -95,8 +93,8 @@ class FDSDataHandler implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("客户端发送请求的地址：" + incoming.getSocketAddress());
-        server.UDP_tm.addRow(new String[]{String.valueOf(connectingCount++), incoming.getAddress().toString(), String.valueOf(incoming.getPort()),"normal"});
+        System.out.println("客户端发送请求的地址:" + incoming.getSocketAddress());
+        Server.UDP_tm.addRow(new String[]{String.valueOf(connectingCount++), incoming.getAddress().toString(), String.valueOf(incoming.getPort()),"normal"});
         //给客户端发送数据行数信息
         String startData = "待发送的行数为:10000";
         byte[] startInfoBytes = startData.getBytes();
@@ -113,11 +111,12 @@ class FDSDataHandler implements Runnable {
             try {
                 while ((lineInfo = bufferedReader.readLine()) != null) {
                     if (UDP_currentThreadIsShutDown){
-                        System.out.println("停止线程!");
+                        System.out.println("服务器关闭此线程!");
                         lineData = "shutDown!".getBytes();
                         incoming.setData(lineData);
                         incoming.setLength(lineData.length);
                         socket.send(incoming);
+                        Server.UDP_tm.addRow(new String[]{String.valueOf(connectingCount++), incoming.getAddress().toString(), String.valueOf(incoming.getPort()),"interrupted!"});
                         return;
                     }
                     lineData = lineInfo.getBytes();
@@ -142,6 +141,7 @@ class FDSDataHandler implements Runnable {
         byte[] endDataBytes = endData.getBytes();
         incoming.setData(endDataBytes);
         incoming.setLength(endDataBytes.length);
+        Server.UDP_tm.addRow(new String[]{String.valueOf(connectingCount++), incoming.getAddress().toString(), String.valueOf(incoming.getPort()),"finished!"});
         try {
             socket.send(incoming);
         } catch (IOException e) {
