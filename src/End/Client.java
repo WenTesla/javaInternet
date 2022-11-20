@@ -20,9 +20,10 @@ import static End.Client.ReceiveAndProcessData.readFlag;
 
 
 /**
+ * 客户端的GUI页面
  * @author BoWen
- * @version 1.2
- * @Data 2022/11/15
+ * @version 2.2
+ * @Data 2022/11/19
  */
 public class Client extends JFrame {
 
@@ -219,6 +220,9 @@ public class Client extends JFrame {
         scrollPane.setViewportView(table);
     }
 
+    /**
+     * 接受和分析类，用于辅助GUI页面
+     */
     class ReceiveAndProcessData extends SwingWorker<String, String[]> {
 
         InputStream inputStream;
@@ -262,13 +266,13 @@ public class Client extends JFrame {
         }
 
         /**
-         * 处理传入的参数
+         * 处理传入的参数初始化
          *
-         * @param procotol
-         * @param tcp_address
-         * @param tcp_port
-         * @param udp_address
-         * @param udp_port
+         * @param procotol 协议
+         * @param tcp_address tcp地址
+         * @param tcp_port tcp端口
+         * @param udp_address udp地址
+         * @param udp_port udp端口
          */
         public ReceiveAndProcessData(String procotol, String tcp_address, String tcp_port, String udp_address, String udp_port) {
             this.procotol = procotol;
@@ -278,7 +282,11 @@ public class Client extends JFrame {
             this.UDP_Port = udp_port;
         }
 
-
+        /**
+         * 用于开启线程绘制滚动条
+         * @param chunks intermediate results to process
+         *
+         */
         @Override
         protected void process(List<String[]> chunks) {
             new outputData(outputData).start();
@@ -398,10 +406,9 @@ public class Client extends JFrame {
                         line = sc.nextLine();
                         if ("shutDown!".equals(line)) {
                             JOptionPane.showMessageDialog(null, "系统即将停止服务!" + "\n");
-                            
                             break;
                         }
-                        if ("no data!!".equals(line)) {
+                        if ("no data!".equals(line)) {
                             JOptionPane.showMessageDialog(null, "接受数据完成!" + "\n");
                             break;
                         }
@@ -648,11 +655,10 @@ public class Client extends JFrame {
              * <FPTT>	计划起飞时间
              * <FETT>	预计起飞时间
              * <FRTT>   实际起飞时间
-             * 后续将简化
+             *
              */
             if (line.contains("fptt") || line.contains("fett")) {//一个航班同时fett和fptt，就用fett
                 matcher = Pattern.compile("ARPT\\[.*?\\]").matcher(line);
-
                 if (matcher.find()) {
                     String timeFly = matcher.group();
                     String[] strings = timeFly.split(", ");
@@ -672,15 +678,11 @@ public class Client extends JFrame {
                         actualFlyTime = builder2.toString();
                         System.out.println("实际" + actualFlyTime);
                     }
-
                 }
             }
             if (!line.contains("fptt") && line.contains("fett")) {//一个航班只有fett就用fett
                 matcher = Pattern.compile("\\[.*\\]").matcher(line);
-
                 if (matcher.find()) {
-//                    System.out.println(matcher5.group());
-//                    [flid=1418075, ffid=GS-7892-20180925-A, fett=null, felt=20180925012500]
                     Pattern pattern2 = Pattern.compile("(?<=fett=).*?(?=,)");
                     Matcher matcher6 = pattern2.matcher(line);
                     if (matcher6.find()) {
@@ -690,7 +692,6 @@ public class Client extends JFrame {
                             builder3.insert(2, ":");
                             //临时更换成actualFlyTime
                             actualFlyTime = builder3.toString();
-
                         }
                     }
                 }
@@ -733,7 +734,7 @@ public class Client extends JFrame {
     }
 
     /**
-     * 数据输出线程
+     * 数据输出线程,同时绘制和清除滚动窗口
      */
 
     class outputData extends Thread {

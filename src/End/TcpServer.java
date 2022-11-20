@@ -13,12 +13,13 @@ import java.util.logging.Level;
 import static End.Server.TCP_tm;
 
 public class TcpServer extends AbstractTcpServer {
-    private static int connectingCount = 0;
+    private static volatile int connectingCount = 0;
     private ByteBuffer fileBuffer;
     // 用RandomAccessFile以可读写模式加载flightdata.txt
     private RandomAccessFile randomAccessFile = new RandomAccessFile(new File("fdsdata2.txt"), "r");
 
     static volatile boolean TCP_currentThreadIsShutDown = false;
+
     public TcpServer(String address, String port) throws Exception {
         super(address, Integer.parseInt(port));
     }
@@ -29,7 +30,7 @@ public class TcpServer extends AbstractTcpServer {
 
     @Override
     protected void respond() {
-        logger.log(Level.INFO, "TCP服务器启动成功！\n" +"地址:"+address+" 端口号:" + port);
+        logger.log(Level.INFO, "TCP服务器启动成功！\n" + "地址:" + address + " 端口号:" + port);
         while (true) {
             SelectionKey key = null;
 
@@ -63,9 +64,8 @@ public class TcpServer extends AbstractTcpServer {
                             fileBuffer.put(temp, 0, n); // 根据每次实际读出的数据长度，向fileBuffer追加该长度的数据，单位字节，避免最后一个缓冲区有多余空间产生浪费
                         }
                         fileBuffer.flip(); // 把极限设成位置，把位置设成零
-
                         selectionKey.attach(fileBuffer); // 将fileBuffer作为附件附加到key中
-                        TCP_tm.addRow(new String[]{String.valueOf(connectingCount),address, String.valueOf(port),"normal"});
+                        TCP_tm.addRow(new String[]{String.valueOf(connectingCount++), address, String.valueOf(port), "normal"});
                     }
                     if (key.isReadable()) {
 
@@ -73,26 +73,29 @@ public class TcpServer extends AbstractTcpServer {
                     if (key.isWritable()) {
                         SocketChannel socketChannel = (SocketChannel) key.channel();
                         ByteBuffer bufferToSend = (ByteBuffer) key.attachment(); // 取出附件
-                        if (TCP_currentThreadIsShutDown){
+                        if (TCP_currentThreadIsShutDown) {
                             // 发送结束
                             byte[] endMessage = "shutDown!".getBytes();
                             ByteBuffer endBuffer = ByteBuffer.wrap(endMessage);
                             socketChannel.write(endBuffer);
-                            continue;
+                            TCP_tm.addRow(new String[]{String.valueOf(connectingCount++), socketChannel.getRemoteAddress().toString(), String.valueOf(port), "interrupted!"});
+                            socketChannel.close(); // 关闭连接
+                            key.cancel(); // 取消key的相关channel和key的selector
+                            return;
                         }
                         if (bufferToSend.hasRemaining()) {
                             socketChannel.write(bufferToSend);
-                        } else {
-                            // 发送结束
-                            byte[] endMessage = "\r\nno data!\r\n".getBytes();
-                            ByteBuffer endBuffer = ByteBuffer.wrap(endMessage);
-                            socketChannel.write(endBuffer);
-                            System.out.println(socketChannel.getRemoteAddress() + "的数据已发送完毕\n");
-                            socketChannel.close(); // 关闭连接
-                            key.cancel(); // 取消key的相关channel和key的selector
-                            TCP_tm.addRow(new String[]{String.valueOf(connectingCount),address, String.valueOf(port),"finish!"});
-
                         }
+                        // 发送结束
+                        byte[] endMessage = "\r\nno data!\r\n".getBytes();
+                        ByteBuffer endBuffer = ByteBuffer.wrap(endMessage);
+                        socketChannel.write(endBuffer);
+                        System.out.println(socketChannel.getRemoteAddress() + "的数据已发送完毕\n");
+                        ///127.0.0.1:37769
+                        TCP_tm.addRow(new String[]{String.valueOf(connectingCount++), socketChannel.getRemoteAddress().toString(), String.valueOf(port), "finish!"});
+                        socketChannel.close(); // 关闭连接
+                        key.cancel(); // 取消key的相关channel和key的selector
+
                     }
                 }
             } catch (IOException e) {

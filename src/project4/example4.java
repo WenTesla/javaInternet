@@ -38,7 +38,7 @@ public class example4 {
     //初始化RandomAccessFile文件
     {
         try {
-            randomAccessFile = new RandomAccessFile(new File("fdsdata2.txt"), "rw");
+            randomAccessFile = new RandomAccessFile(new File("fdsdata2.txt"), "r");
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
