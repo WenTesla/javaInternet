@@ -23,13 +23,12 @@ src下每个包代表一个实验
 
 #### 客户端：
 
-![image-20230110205359476](https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/12640/image-20230110205359476.png)
-
+[![image-20230110205359476-1.png](https://i.postimg.cc/jSqM2gZj/image-20230110205359476-1.png)](https://postimg.cc/w7PXbVKK)  
 输入本地的IP地址和端口号即可开启，也可以选择协议（二选一）
 
 #### 服务器：
+[![image-20230110205528546.png](https://i.postimg.cc/HW2WXjTk/image-20230110205528546.png)](https://postimg.cc/DmSKKvW9)
 
-![image-20230110205528546](https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/12640/image-20230110205528546.png)
 
 输入本地的IP地址和端口号即可开启，也同时开启UDP和TCP服务。
 
@@ -37,15 +36,14 @@ src下每个包代表一个实验
 
 如下：
 
-![image-20230110205854719](https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/12640/image-20230110205854719.png)
 
 同时可以在控制面板显示相关服务
 
 并发操作显示如下：
 
-![image-20230110210021095](https://xingqiu-tuchuang-1256524210.cos.ap-shanghai.myqcloud.com/12640/image-20230110210021095.png)
 
-
+[![image-20230110210021095.png](https://i.postimg.cc/FzcjCcp8/image-20230110210021095.png)](https://postimg.cc/5Q4Y6XZS)  
+[![image-20230110205854719-1.png](https://i.postimg.cc/zG3fJ5ZX/image-20230110205854719-1.png)](https://postimg.cc/bZcPT7wK)  
 
 
 
@@ -63,5 +61,5 @@ Github: WenTesla
 
 ⏱️Data: 2022/11/21
 
-⏱️UpdatedData:2023/1/10
+⏱️UpdatedData:2023/4/19
 
